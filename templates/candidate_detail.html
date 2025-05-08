@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <title>Candidate Management</title>
+</head>
+<body>
+
+    <div class="header-container">
+        <h2>Candidate Management</h2>
+        <form action="{{ url_for('candidate') }}" method="GET">
+          <button type="submit">Back</button>
+        </form>
+
+
+        <form action="{{ url_for('admin') }}" method="GET">
+          <button type="submit">Add Question</button>
+        </form>
+    </div>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <div class="table-container">
+      <table >
+        <thead>
+            <tr>
+                <th>Candidate id</th>
+                <th>Candidate Name</th>
+                <th>Email</th>
+                <th>Contact Number</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in candidate %}
+            <tr>
+                <td  id="cid" ">{{ c['id'] }}</td>
+                <td>{{ c['candidatename'] }}</td>
+                <td>{{ c['email'] }}</td>
+                <td>{{ c['contactnumber'] }}</td>
+                <td>
+                    <!-- Action Form -->
+                    <button class="btn btn-sm btn-outline-primary edit-btn" data-id="{{ c.id }}"
+                    data-name="{{ c.candidatename }}"
+                    data-email="{{c.email}}"
+                    data-number="{{c.contactnumber}}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editModal" id="edit-btn" onclick="editquestionModal('{{c.id}}','{{c.candidatename }}','{{c.email}}','{{c.contactnumber}}','{{questionlist}}','{{sqllist}}')" data-bs-toggle="modal" data-bs-target="#editModal">View</button>
+                  
+                    <form  action="{{ url_for('deletecandidate', record_id=c.id) }}" method="POST" style="display: inline;">
+                      <button id="edit-btn1"  type="submit" class="btn btn-danger btn-sm">
+                          <i class="fas fa-trash-alt"></i> Delete
+                      </button> 
+                  </form>
+
+                  </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Modal -->
+      <div class="modal" id="editModal" tabindex="-1" >
+        <div class="modal-header">
+        <h4 class="h3-header">Candidate information </h4>
+        <span class="h3-header"  onclick="editcloseModal()">&times;</span>
+        </div>
+        <!-- Horizontal Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <button  class="nav-link active" id="tab1-tab" data-bs-toggle="tab" href="#tab1" role="tab"
+            aria-controls="tab1" aria-selected="true">Candidate Details</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" href="#tab2" role="tab"
+            aria-controls="tab2" aria-selected="false">Selenium</button>
+            <!--<button class="nav-link"  id="selenium-tab" data-bs-toggle="tab" data-bs-target="#selenium" type="button" role="tab" >Selenium</button> -->
+          </li>
+          <li class="nav-item" >
+            <button  class="nav-link" id="tab3-tab" data-bs-toggle="tab" href="#tab3" role="tab"
+            aria-controls="tab3" aria-selected="false">SQL</button>
+          </li>
+        </ul>
+          <div class="tab-content" id="myTabContent">
+           <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+              <div class="form-group">
+                <label class="label-glowedit" for="id">Candidate Id:</label>
+                <input class="form-control" type="text" id="edit-id" name="id"  required>
+              </div>
+              <div class="form-group">
+                <label class="label-glowedit" for="name">Candidate Name:</label>
+                <input class="form-control" type="text" id="edit-name" name="name" required>
+              </div>
+        
+              <div class="form-group">
+                <label class="label-glowedit" for="email">Email Address:</label>
+                <input class="form-control" type="email" id="edit-email" name="email"  required>
+              </div>
+              <div class="form-group">
+                <label class="label-glowedit" for="number">Contact Number:</label>
+                <input class="form-control" type="text" id="edit-number" name="number"  required>
+              </div>
+            </div>
+            <div  class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+              <input class="form-control" type="text" id="edit-qid" name="qid"  hidden>
+              <input type="text" id="selectedId" value="{{ selected }}" hidden>
+
+                {% for q in questionlist %}
+                  <div class="form-group" data-qid="{{q.candidate_id}}">
+                      <div class="question-block" >
+                      <label  class="label-glowedit">{{ q.question_name }}</label>
+                      <label class="label-glowedit">User Score: {{ q.user_score or 'No score' }}</label><br><br>
+                      <textarea class="textarea-glow" id="selenium_{{q.id }}_{{q.candidate_id}}" name="answer_{{q.id }}" rows="5" cols="80"   value="{{ q.user_answer }}" placeholder="Enter your text here...">{{q.user_answer}} </textarea><br>
+                      </div>
+                  </div>
+                {% endfor %}
+            </div>
+            <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
+               {% for q in sqllist  %}
+                  <div class="form-group">
+                  <div class="question-block">
+                  <label class="label-glowedit">{{ q.question_name }}</label>
+                  <label class="label-glowedit">User Score: {{ q.user_score or 'No score' }}</label><br><br>
+                  <textarea class="textarea-glow" id="sql_{{q.id }}_{{q.candidate_id}}" name="answer_{{q.id }}" rows="5" cols="80"   value="{{ q.user_answer }}" placeholder="Enter your text here...">{{q.user_answer}} </textarea><br>
+                  </div>
+                  </div>
+               {% endfor %}
+            </div>
+          </div>
+      </div>
+
+      <div class="modal" id="scoreModal" tabindex="-1" >
+        <div class="modal-header">
+        <h4 class="h3-header">Candidate information </h4>
+        <span class="h3-header"  onclick="editcloseModal()">&times;</span>
+        </div>
+        <!-- Horizontal Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <button  class="nav-link active" id="tab1-tab" data-bs-toggle="tab" href="#tab1" role="tab"
+            aria-controls="tab1" aria-selected="true">Candidate Details</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" href="#tab2" role="tab"
+            aria-controls="tab2" aria-selected="false">Selenium</button>
+            <!--<button class="nav-link"  id="selenium-tab" data-bs-toggle="tab" data-bs-target="#selenium" type="button" role="tab" >Selenium</button> -->
+          </li>
+          <li class="nav-item" >
+            <button  class="nav-link" id="tab3-tab" data-bs-toggle="tab" href="#tab3" role="tab"
+            aria-controls="tab3" aria-selected="false">SQL</button>
+          </li>
+        </ul>
+          <div class="tab-content" id="myTabContent">
+           <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+              <div class="form-group">
+                <label class="label-glowedit" for="id">Candidate Id:</label>
+                <input class="form-control" type="text" id="edit-id" name="id"  required>
+              </div>
+              <div class="form-group">
+                <label class="label-glowedit" for="name">Candidate Name:</label>
+                <input class="form-control" type="text" id="edit-name" name="name" required>
+              </div>
+        
+              <div class="form-group">
+                <label class="label-glowedit" for="email">Email Address:</label>
+                <input class="form-control" type="email" id="edit-email" name="email"  required>
+              </div>
+              <div class="form-group">
+                <label class="label-glowedit" for="number">Contact Number:</label>
+                <input class="form-control" type="text" id="edit-number" name="number"  required>
+              </div>
+            </div>
+            <div  class="tab-pane" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+              <input class="form-control" type="text" id="edit-qid" name="qid"  hidden>
+              <input type="text" id="selectedId" value="{{ selected }}" hidden>
+
+                {% for q in questionlist %}
+                  <div class="form-group" data-qid="{{q.candidate_id}}">
+                      <div class="question-block" >
+                      <label  class="label-glowedit">{{ q.question_name }} {{q.user_score}}</label><br><br>
+                      <label>User Score: {{ q.user_score or 'No score' }}</label>
+                      <textarea class="textarea-glow" id="selenium_{{q.id }}_{{q.candidate_id}}" name="answer_{{q.id }}" rows="5" cols="80"   value="{{ q.user_answer }}" placeholder="Enter your text here...">{{q.user_answer}} </textarea><br>
+                      </div>
+                  </div>
+                {% endfor %}
+            </div>
+            <div class="tab-pane" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
+               {% for q in sqllist  %}
+                  <div class="form-group">
+                  <div class="question-block">
+                  <label class="label-glowedit">{{ q.question_name }} {{ q.user_score }}</label><br><br>
+                  <label>User Score: {{ q.user_score or 'No score' }}</label>
+                  <textarea class="textarea-glow" id="sql_{{q.id }}_{{q.candidate_id}}" name="answer_{{q.id }}" rows="5" cols="80"   value="{{ q.user_answer }}" placeholder="Enter your text here...">{{q.user_answer}} </textarea><br>
+                  </div>
+                  </div>
+               {% endfor %}
+            </div>
+          </div>
+      </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+   <script>
+          
+        window.templist = null;
+        window.templist1 = null;
+        window.templist1 = null;
+        window.selected;
+        function editquestionModal(id,name,email,number,questionlist,sqllist) {
+           document.getElementById("editModal").style.display = "block";
+           document.getElementById('edit-id').value = id;
+           document.getElementById('edit-name').value = name;
+           document.getElementById('edit-email').value = email;
+           document.getElementById('edit-number').value = number;
+           let selectedId = document.getElementById('edit-id').value;
+           document.getElementById('selectedId').value = selectedId;
+           canid = document.getElementById('edit-id').value;
+           candidateid = canid;
+           console.log("final value"+candidateid)
+           const btn = document.getElementById("edit-btn");
+           btn.hidden = false;
+           const btn1 = document.getElementById("edit-btn1");
+           btn1.hidden = true;
+        }
+
+        function closeModal() {
+           
+            document.getElementById("questionModal").style.display = "none";
+            alert = request.args.get('alert', None)
+        }
+
+        function editcloseModal() 
+        {
+          document.getElementById("editModal").style.display = "none";
+          location.reload();
+
+        }
+
+        
+
+</script>
+</body>
+</html>

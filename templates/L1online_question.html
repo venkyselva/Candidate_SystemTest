@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+<h2 class="header-container">L1 Technical Discussion</h2>
+
+<h3 class="h3-header">Status: {{ value4 }}</h3>
+
+
+<div class="tab">
+  <button class="tablinks" onclick="opentab(event, 'candidate')">Candidate Details</button>
+  <button class="tablinks" onclick="opentab(event, 'Automation')">Selenium</button>
+  <button class="tablinks" onclick="opentab(event, 'SQL')">SQL</button>
+</div>
+
+<div id="candidate" class="tabcontent">
+    <h3>Candidate Information</h3>
+    <form action="/submit_candidate" method="POST">
+        <div class="form-group">
+        <label for="name">Candidate Name:</label>
+        <input type="text" id="name" name="name" value="{{ value1 }}" required><br>
+        </div>
+
+        <div class="form-group">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email"  value="{{ value2 }}" required><br>
+        </div>
+
+        <div class="form-group">
+        <label for="number">Contact Number:</label>
+        <input type="text" id="number" name="number" value="{{ value3 }}" required><br>
+        </div>
+        <input type="hidden" id="candidateid" name="candidateid" value="{{ value0 }}">
+        <div class="button-container">
+        <button class="submit-btn" type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+
+<div id="Automation" class="tabcontent">
+    <h3 class="underline-animate-always">Selenium Automation Question</h3>
+    
+    <form action="/submit_automation" method="POST">
+      
+      {% for q in questionlist %}
+      <div class="form-group">
+        <div class="question-block">
+          <label  class="label-glow">{{ q.question }}</label><br><br>
+          <input type="text" id="ansid" value="{{ q.user_answer if q.user_answer else '' }}" hidden>
+          <textarea class="textarea-glow" id="selenium_{{q.id }}_{{value0}}" name="answer_{{q.id }}_{{value0}}" rows="5" cols="80"   value="{{ q.user_answer }}" placeholder="Enter your text here...">{{q.user_answer}} </textarea><br>
+        </div>
+      </div>
+      <input type="hidden" name="action_flag" value="{{ 'update' if q.user_answer else 'insert' }}">
+      {% endfor %}
+        <div class="button-container">
+        
+        <button class="submit-btn" type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+
+<div id="SQL" class="tabcontent">
+  <h3 class="underline-animate-always">SQL Question</h3>
+  
+  <form action="/submit_sql" method="POST">
+    {% for q in sqllist %}
+    <div class="form-group">
+      <div class="question-block">
+        <label class="label-glow">{{ q.question }}</label><br><br>
+        <input type="text" id="ansid" value="{{ q.user_answer if q.user_answer else '' }}" hidden>
+        <textarea class="textarea-glow" id="selenium_{{q.id }}_{{value0}}" name="answer_{{q.id }}_{{value0}}" rows="5" cols="80"   value="{{ q.user_answer }}" placeholder="Enter your text here...">{{q.user_answer}} </textarea><br>
+      </div>
+    </div>
+    <input type="hidden" name="action_flag" value="{{ 'update' if q.user_answer else 'insert' }}">
+    {% endfor %}
+      <div class="button-container">
+      <button class="submit-btn" type="submit">Submit</button>
+      </div>
+  </form>
+</div>
+
+</div>
+
+<script>
+
+function opentab(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+window.onload = function () {
+    const firstTab = document.querySelector(".tablinks");
+    if (firstTab) {
+      firstTab.click();  // triggers openTab for the first tab
+    }
+  };
+
+
+</script>
+   
+</body>
+</html> 
